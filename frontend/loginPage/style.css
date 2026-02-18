@@ -32,6 +32,9 @@ body {
     border-top-left-radius: 20px;
     border-bottom-left-radius: 20px;
 }
+#stduent_content{
+    padding-top:20px;
+}
 
 .Box2 {
     height: 85%;
@@ -146,9 +149,10 @@ body {
     margin-top: 20px;
     transition: background-color 0.3s;
     animation: colorchange 1s infinite alternate;
-   
-
-
+}
+#login-btn a{
+    text-decoration: none;
+    color: #171717;
 }
 /* @keyframes colorchange{
    25%{
