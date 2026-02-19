@@ -22,6 +22,12 @@ async function register(req, res) {
         if (!email.includes("@")) {
             return res.status(400).json({ message: "Invalid email format" });
         }
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+        if (name.length > 50 || subject.length > 50) {
+            return res.status(400).json({ message: "Name and Subject must be less than 50 characters" });
+        }
 
 
         const isuserExist = await pool.query('select 1 from users where email = $1', [email]);
@@ -59,6 +65,10 @@ async function register(req, res) {
 
         return res.status(201).json({ message: "register successful" });
     } catch (err) {
+        // Handle Unique Constraint Violation (e.g. email already exists)
+        if (err.code === '23505') {
+            return res.status(400).json({ message: "User with this email already exists" });
+        }
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
     }
@@ -120,7 +130,7 @@ async function me(req, res) {
         if (!user) return res.status(404).json({ message: "User not found" });
         res.json({
             message: "details fetched successfully",
-            user: {                   
+            user: {
                 "id": user.id,
                 "name": user.name,
                 "email": user.email,
