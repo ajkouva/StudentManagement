@@ -35,4 +35,24 @@ async function studentDetails(req, res) {
     }
 }
 
-module.exports = { studentDetails };
+async function attendanceCalendar(req, res) {
+    const userEmail = req.user?.email;
+    if (!userEmail) {
+        return res.status(400).json({ error: "User email required" });
+    }
+    try {
+        // Query attendance directly using email as it is the foreign key
+        const attendanceQuery = "SELECT TO_CHAR(date, 'YYYY-MM-DD') as date, status FROM attendance WHERE email = $1 ORDER BY date DESC";
+        const attendanceResult = await pool.query(attendanceQuery, [userEmail]);
+
+        res.json({
+            attendance: attendanceResult.rows
+        });
+
+    } catch (e) {
+        console.error("Attendance calendar error: ", e);
+        res.status(500).json({ error: "Server error" });
+    }
+}
+
+module.exports = { studentDetails, attendanceCalendar };

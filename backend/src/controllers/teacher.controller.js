@@ -108,7 +108,7 @@ async function stats(req, res) {
         }
         let total_student = 0;
         const result = await pool.query('select count(*) as count from student ');
-        total_student = parseInt(result.rows[0].count);
+        total_student = parseInt(result.rows[0].count, 10);
         const today = new Date().toISOString().split('T')[0];
 
         let present = 0;
@@ -116,7 +116,7 @@ async function stats(req, res) {
 
         const presentResult = await pool.query('select count(*) as count from attendance where date= $1 and status = $2', [today, 'PRESENT']);
 
-        present = parseInt(presentResult.rows[0].count);
+        present = parseInt(presentResult.rows[0].count, 10);
 
         absent = total_student - present;
 
