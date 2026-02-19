@@ -13,18 +13,16 @@ async function loginwork(){
     
     console.log("hello")
     try {
-        const rse = await fetch("http://localhost:3000/api/auth/login",{
-            "Email":Email,
-            "Password":Password
-        },{
-            method:"POST",
-             headers: {
-                "Content-Type": "application/json",
-        }})
+        const rse = await fetch("http://localhost:3000/api/auth/login", {
+            method: "POST",
+            credentials: 'include',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        })
         const data = await rse.json();
         console.log(data);
     } catch (error) {
-        
+        console.log(error);
     }
      
 }
