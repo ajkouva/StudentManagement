@@ -4,7 +4,7 @@ const pool = require("../db/db");
 async function studentDetails(req, res) {
     try {
         if (!req.user) {
-            return res.status(400).json({ error: "User email required" });
+            return res.status(401).json({ error: "Unauthorized" });
         }
         if (req.user.role !== "STUDENT") {
             return res.status(403).json({ message: "Access denied" });
@@ -36,13 +36,25 @@ async function studentDetails(req, res) {
 }
 
 async function attendanceCalendar(req, res) {
-    const userEmail = req.user?.email;
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (req.user.role !== "STUDENT") {
+        return res.status(403).json({ message: "Access denied" });
+    }
+    const userEmail = req.user.email;
     if (!userEmail) {
         return res.status(400).json({ error: "User email required" });
     }
     try {
-        // Query attendance directly using email as it is the foreign key
-        const attendanceQuery = "SELECT TO_CHAR(date, 'YYYY-MM-DD') as date, status FROM attendance WHERE email = $1 ORDER BY date DESC";
+        // Query attendance by joining with student table since attendance uses student_id
+        const attendanceQuery = `
+            SELECT TO_CHAR(a.date, 'YYYY-MM-DD') as date, a.status 
+            FROM attendance a
+            JOIN student s ON a.student_id = s.id
+            WHERE s.email = $1 
+            ORDER BY a.date DESC
+        `;
         const attendanceResult = await pool.query(attendanceQuery, [userEmail]);
 
         res.json({
