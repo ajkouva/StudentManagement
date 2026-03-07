@@ -289,7 +289,29 @@ background:#101010;
   transition: 0.2s;
 
 }
+.dated{
+  height:90px;
+  width: 180px;
+  border-radius:14px;
+  background:#030815;
+  color:#8fa0d0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:10px;
+  font-weight:600;
+  transition: 0.2s;
+
+}
 .date:hover{
   background:#121a33;
   transform:translateY(-2px);
+}
+.present{
+  background-color: #077b56;
+  color:#ffffff;
+}
+.absent{
+  background-color:#ff6B81;
+  color:#ffffff;
 }
