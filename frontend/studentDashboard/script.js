@@ -25,7 +25,11 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 async function changeper(){
     try {
-        const res = await fetch("http://127.0.0.1:3000/api/student/studentDetails");
+        const res = await fetch("http://127.0.0.1:3000/api/student/studentDetails",{
+            method:"GET",
+             credentials:"include",
+            headers: { "Content-Type": "application/json" },
+            });
 
         const data = await res.json();
         console.log(data);
@@ -61,6 +65,7 @@ function work(){
     var date=new Date(year,month+1,0).getDate();
     var day=new Date(year,month,1).getDay();
     
+    
     console.log(day);
     for(i=0;i<day;i++){
         let div=document.createElement("div");
@@ -94,20 +99,26 @@ mounthE1.addEventListener("input",work);
        method:"POST",
        credentials:"include",
        headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ "month":month, "year":year})
+       body: JSON.stringify({ "month":month+1, "year":year})
      });
      const data=await res.json();
         console.log(data);
 
-      const date=document.querySelectorAll(".date")
-                // console.log(date.length)
+      let date=document.querySelectorAll(".date")
+                // console.log(date)
+                 
       date.forEach(function(elem){
-                    for(i=0;i<date.length;i++){
+                    for(i=0;i<data.coloredRows.length;i++){
+                        // console.log(date)
+                       const dates=data.coloredRows[i].date.split("-") 
+                        j=Number(dates[2])-1;
+                        // console.log(j)
+                        // console.log(date.parentElement)
                 if(data.coloredRows[i].color==="green"){
-                           date.classList.add("present") 
+                          date[j].classList.add("present") 
                 }
                 else if(data.coloredRows[i].color==="red"){
-                    date.classList.add("absent");
+                    date[j].classList.add("absent");
                 }
                 else{
                         pass
