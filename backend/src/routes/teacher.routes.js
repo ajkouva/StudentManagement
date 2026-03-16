@@ -10,5 +10,7 @@ router.post('/markAttendance', protect, teacherController.markAttendance);
 router.get('/attendance75', protect, teacherController.attendance75);
 router.get('/attendanceDetails', protect, teacherController.attendanceDetails);
 router.delete('/deleteStudent/:id', protect, teacherController.deleteStudent);
+router.get('/getstudent', protect, teacherController.getstudent);
+router.get('/getstudent/:id', protect, teacherController.getstudent);
 
 module.exports = router;

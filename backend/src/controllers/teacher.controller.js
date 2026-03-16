@@ -200,8 +200,7 @@ async function markAttendance(req, res) {
         // Fetch teacher's subject to scope the attendance (Moved inside try/catch for safety)
         const teacherRes = await client.query('SELECT subject FROM teacher WHERE email = $1', [req.user.email]);
         if (teacherRes.rows.length === 0) {
-            // Improvement #19: no writes have happened yet so ROLLBACK is a no-op.
-            // client.release() in finally will auto-rollback the open transaction.
+            await client.query('ROLLBACK'); // CRITICAL: Must rollback before release
             return res.status(404).json({ error: "Teacher profile not found" });
         }
         const teacherSubject = teacherRes.rows[0].subject;
@@ -578,5 +577,50 @@ async function deleteStudent(req, res) {
     }
 }
 
+async function getstudent(req, res) {
+    try {
+        const { id } = req.params;
+        const { subject } = req.query;
 
-module.exports = { teacherDetails, addStudent, stats, markAttendance, attendance75, attendanceDetails, deleteStudent };
+        if (id) {
+            // Check if the id parameter is purely numeric (a single student lookup)
+            const isNumeric = /^\d+$/.test(id);
+
+            if (isNumeric) {
+                const student = await pool.query("SELECT * FROM student WHERE id=$1", [id]);
+                if (student.rows.length === 0) {
+                    return res.status(404).json({ error: "Student not found" });
+                }
+                return res.status(200).json({ student: student.rows[0] });
+            } else {
+                // Otherwise, treat the 'id' parameter as a subject string (e.g. 'bca', 'bba')
+                const students = await pool.query(
+                    "SELECT * FROM student WHERE LOWER(subject) = LOWER($1) ORDER BY roll_num ASC",
+                    [id]
+                );
+                return res.status(200).json({ count: students.rows.length, students: students.rows });
+            }
+        }
+
+        // Fetch all students, with optional filtering by query param subject
+        let queryStr = "SELECT * FROM student";
+        let queryParams = [];
+
+        if (subject) {
+            queryStr += " WHERE LOWER(subject) = LOWER($1)";
+            queryParams.push(subject);
+        }
+
+        // Add a consistent ordering
+        queryStr += " ORDER BY roll_num ASC";
+
+        const students = await pool.query(queryStr, queryParams);
+        return res.status(200).json({ count: students.rows.length, students: students.rows });
+
+    } catch (err) {
+        console.error('getstudent error:', err);
+        return res.status(500).json({ error: 'Server error', details: err.message });
+    }
+}
+
+module.exports = { teacherDetails, addStudent, stats, markAttendance, attendance75, attendanceDetails, deleteStudent, getstudent };
